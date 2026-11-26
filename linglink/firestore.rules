@@ -1,0 +1,229 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+    function isOwner(userId) {
+      return signedIn() && request.auth.uid == userId;
+    }
+    function isSeed() {
+      return signedIn() && request.auth.token.email == 'seed@import.linglink.app';
+    }
+    function same(key) {
+      return request.resource.data.get(key, null) == resource.data.get(key, null);
+    }
+    function textIdentityHeld() {
+      return request.resource.data.id == resource.data.id
+        && request.resource.data.authorId == resource.data.authorId
+        && request.resource.data.createdAt == resource.data.createdAt;
+    }
+    function textCatalogHeld() {
+      return same('title')
+        && same('language')
+        && same('level')
+        && same('status')
+        && same('topics')
+        && same('seriesId')
+        && same('seriesPosition')
+        && same('imageUrl')
+        && same('coAuthorIds');
+    }
+
+    match /texts/{textId} {
+      allow read: if resource.data.status == 'published'
+        || (signedIn() && resource.data.authorId == request.auth.uid)
+        || isSeed();
+      allow create: if isSeed()
+        || (signedIn()
+          && request.resource.data.id == textId
+          && request.resource.data.authorId == request.auth.uid);
+      allow update: if isSeed()
+        || (textIdentityHeld() && signedIn() && (
+          resource.data.authorId == request.auth.uid
+          || textCatalogHeld()
+        ));
+      allow delete: if false;
+
+      match /views/{userId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId) || isSeed();
+      }
+      match /likes/{userId} {
+        allow read: if isOwner(userId);
+        allow create, delete: if isOwner(userId) || isSeed();
+      }
+      match /dislikes/{userId} {
+        allow read: if isOwner(userId);
+        allow create, delete: if isOwner(userId) || isSeed();
+      }
+      match /comments/{commentId} {
+        allow read: if signedIn();
+        allow create: if signedIn()
+          && request.resource.data.authorId == request.auth.uid
+          && request.resource.data.textId == textId
+          && request.resource.data.body is string
+          && request.resource.data.body.size() > 0
+          && request.resource.data.body.size() <= 500;
+        allow update: if signedIn()
+          && request.resource.data.authorId == resource.data.authorId
+          && request.resource.data.body == resource.data.body
+          && request.resource.data.textId == resource.data.textId
+          && request.resource.data.parentId == resource.data.parentId;
+      }
+      match /commentReactions/{reactionId} {
+        allow read: if signedIn() && resource.data.userId == request.auth.uid;
+        allow create, update: if signedIn()
+          && request.resource.data.userId == request.auth.uid;
+        allow delete: if signedIn() && resource.data.userId == request.auth.uid;
+      }
+    }
+
+    match /users/{userId} {
+      allow read: if true;
+      allow create, update: if isOwner(userId) || isSeed();
+
+      match /wordProgress/{docId} {
+        allow read: if isOwner(userId);
+        allow write: if isOwner(userId) || isSeed();
+      }
+      match /textProgress/{docId} {
+        allow read: if isOwner(userId);
+        allow write: if isOwner(userId) || isSeed();
+      }
+      match /wordTextHistory/{docId} {
+        allow read: if isOwner(userId);
+        allow write: if isOwner(userId) || isSeed();
+      }
+      match /savedTexts/{textId} {
+        allow read, write: if isOwner(userId);
+      }
+      match /notifications/{notificationId} {
+        allow read: if isOwner(userId);
+        allow create: if signedIn()
+          && request.resource.data.userId == userId
+          && request.resource.data.type == 'translation-removed'
+          && request.resource.data.word is string
+          && request.resource.data.word.size() > 0
+          && request.resource.data.word.size() <= 200
+          && request.resource.data.translation is string
+          && request.resource.data.translation.size() > 0
+          && request.resource.data.translation.size() <= 200
+          && request.resource.data.read == false;
+        allow update: if isOwner(userId)
+          && request.resource.data.userId == resource.data.userId
+          && request.resource.data.type == resource.data.type
+          && request.resource.data.word == resource.data.word
+          && request.resource.data.translation == resource.data.translation
+          && request.resource.data.createdAt == resource.data.createdAt
+          && request.resource.data.read == true;
+      }
+    }
+
+    match /words/{wordId} {
+      allow read: if true;
+      allow create: if isSeed()
+        || (signedIn()
+          && request.resource.data.id == wordId
+          && request.resource.data.createdBy == request.auth.uid);
+      allow update: if isSeed()
+        || (signedIn()
+          && same('id')
+          && same('language')
+          && same('word')
+          && same('createdBy')
+          && same('createdAt'));
+      allow delete: if false;
+    }
+
+    match /grammarConstructions/{id} {
+      allow read: if true;
+      allow create: if isSeed()
+        || (signedIn()
+          && request.resource.data.id == id
+          && request.resource.data.createdBy == request.auth.uid);
+      allow update: if isSeed()
+        || (signedIn()
+          && same('id')
+          && same('language')
+          && same('construction')
+          && same('createdBy')
+          && same('createdAt'));
+      allow delete: if false;
+    }
+
+    match /topics/{id} {
+      allow read: if true;
+      allow create: if isSeed()
+        || (signedIn()
+          && request.resource.data.id == id
+          && request.resource.data.createdBy == request.auth.uid);
+      allow update, delete: if isSeed();
+    }
+
+    match /appConfig/{id} {
+      allow read: if true;
+      allow write: if isSeed();
+    }
+
+    match /textSeries/{id} {
+      allow read: if true;
+      allow create: if isSeed()
+        || (signedIn()
+          && request.resource.data.authorId == request.auth.uid
+          && request.resource.data.title is string
+          && request.resource.data.title.size() > 0);
+      allow update: if isSeed()
+        || (signedIn()
+          && resource.data.authorId == request.auth.uid
+          && request.resource.data.authorId == resource.data.authorId);
+      allow delete: if isSeed()
+        || (signedIn() && resource.data.authorId == request.auth.uid);
+    }
+
+    match /translationVotes/{id} {
+      allow read: if true;
+      allow create, update: if signedIn()
+        && request.resource.data.userId == request.auth.uid;
+    }
+
+    match /textRatings/{id} {
+      allow read: if true;
+      allow create, update: if signedIn()
+        && request.resource.data.userId == request.auth.uid;
+    }
+
+    match /wordEdits/{id} {
+      allow read: if true;
+      allow create: if signedIn()
+        && request.resource.data.id == id
+        && request.resource.data.authorId == request.auth.uid;
+      allow update: if signedIn()
+        && same('id')
+        && same('wordId')
+        && same('authorId')
+        && same('createdAt')
+        && same('before')
+        && same('after')
+        && same('summary');
+      allow delete: if false;
+    }
+
+    match /wordEditVotes/{id} {
+      allow read: if true;
+      allow create, update: if signedIn()
+        && request.resource.data.userId == request.auth.uid;
+    }
+
+    match /editBans/{id} {
+      allow read: if signedIn();
+      allow create: if isSeed();
+      allow update, delete: if isSeed();
+    }
+
+    match /reports/{id} {
+      allow create: if signedIn();
+      allow read: if false;
+    }
+  }
+}

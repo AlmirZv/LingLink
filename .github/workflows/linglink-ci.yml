@@ -1,0 +1,30 @@
+name: LingLink CI
+
+on:
+  push:
+    paths:
+      - 'linglink/**'
+      - '.github/workflows/linglink-ci.yml'
+  pull_request:
+    paths:
+      - 'linglink/**'
+      - '.github/workflows/linglink-ci.yml'
+
+defaults:
+  run:
+    working-directory: linglink
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: linglink/package-lock.json
+      - run: npm ci
+      - run: npm run type-check
+      - run: npm run lint
+      - run: npm run test:unit -- --run

@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">LingLink</string>
+    <string name="title_activity_main">LingLink</string>
+    <string name="package_name">app.linglink</string>
+    <string name="custom_url_scheme">app.linglink</string>
+</resources>

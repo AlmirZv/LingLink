@@ -1,0 +1,130 @@
+:root {
+  color-scheme: dark;
+  --pixel-bg: #141311;
+  --pixel-bg-elevated: #1d1c19;
+  --pixel-surface: #2a2924;
+  --pixel-highlight: #2a2924;
+  --pixel-border: color-mix(in srgb, #f4f0e6 12%, transparent);
+  --pixel-shadow: rgb(0 0 0 / 28%);
+  --pixel-text: #f4f0e6;
+  --pixel-text-muted: #9c968c;
+  --pixel-accent: #c9b896;
+  --pixel-on-accent: #141311;
+  --pixel-accent-hover: #d8c9ab;
+  --pixel-danger: #d67a72;
+  --pixel-success: #8fba93;
+  --pixel-study: #e0b06a;
+  --pixel-warning: #d4a05a;
+  --pixel-press-filter: brightness(0.94);
+  --pixel-elev-shadow: 0 10px 28px rgb(0 0 0 / 28%);
+
+  --pixel-border-width: 1px;
+  --pixel-radius: 1.15rem;
+  --pixel-radius-sm: 0.8rem;
+  --pixel-radius-pill: 999px;
+  --pixel-font: 'Noto Sans', 'Plus Jakarta Sans', 'Segoe UI', 'Hiragino Sans', 'Hiragino Kaku Gothic ProN',
+    'Yu Gothic UI', 'Yu Gothic', 'Meiryo', 'Noto Sans JP', 'Noto Sans SC', 'Noto Sans KR',
+    'Noto Sans Arabic', 'Noto Naskh Arabic', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+  --pixel-font-size-xs: 0.9375rem;
+  --pixel-font-size-sm: 1.15rem;
+  --pixel-font-size-md: 1rem;
+  --pixel-font-size-lg: 1.35rem;
+
+  --app-max-width: 480px;
+  --bottom-nav-height: 4.35rem;
+  --top-bar-height: 3.5rem;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+html[data-theme='light'] {
+  color-scheme: light;
+  --pixel-bg: #f4f0e6;
+  --pixel-bg-elevated: #faf7f0;
+  --pixel-surface: #ebe5d8;
+  --pixel-highlight: #faf7f0;
+  --pixel-border: color-mix(in srgb, #151515 12%, transparent);
+  --pixel-shadow: rgb(21 21 21 / 8%);
+  --pixel-text: #151515;
+  --pixel-text-muted: #6e6860;
+  --pixel-accent: #2f4a3e;
+  --pixel-on-accent: #f4f0e6;
+  --pixel-accent-hover: #3d5f50;
+  --pixel-danger: #b54a42;
+  --pixel-success: #3d6b48;
+  --pixel-study: #9a4f12;
+  --pixel-warning: #9a6b24;
+  --pixel-press-filter: brightness(0.97);
+  --pixel-elev-shadow: 0 12px 32px rgb(21 21 21 / 6%);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+  overflow-x: hidden;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  max-width: 100%;
+  overflow-x: hidden;
+  font-family: var(--pixel-font);
+  font-size: 1rem;
+  font-weight: 450;
+  line-height: 1.55;
+  letter-spacing: -0.011em;
+  color: var(--pixel-text);
+  background: var(--pixel-bg);
+}
+
+#app {
+  min-height: 100dvh;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
+a {
+  color: var(--pixel-accent);
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--pixel-accent) 55%, transparent);
+  outline-offset: 3px;
+}
+
+.app-container {
+  width: 100%;
+  max-width: var(--app-max-width);
+  margin: 0 auto;
+  padding-left: max(1.1rem, env(safe-area-inset-left, 0px));
+  padding-right: max(1.1rem, env(safe-area-inset-right, 0px));
+}
+
+.pixel-box,
+.pixel-border {
+  border: var(--pixel-border-width) solid var(--pixel-border);
+  border-radius: var(--pixel-radius);
+  box-shadow: var(--pixel-elev-shadow);
+  background: var(--pixel-bg-elevated);
+}
+
+.pixel-text-muted {
+  color: var(--pixel-text-muted);
+}
